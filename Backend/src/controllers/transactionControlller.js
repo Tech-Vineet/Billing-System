@@ -5,6 +5,9 @@ const Counter = require('../Models/Counter');
 const transactionValidator = require('../validators/transactionValidators');
 const mongoose = require('mongoose');
 
+// ✅ Step 4: Import the invoice log updater
+const { updateInvoiceLog } = require('./invoiceLogController'); 
+
 // Parse dd-mm-yyyy → Date object
 function parseDate(ddmmyyyy) {
   const [dd, mm, yyyy] = ddmmyyyy.split('-').map(Number);
@@ -25,7 +28,6 @@ const createTransaction = async (req, res) => {
 
       const parsedExpiryDate = parseDate(i.expiryDate);
 
-      // Match batch by number and expiry
       const batch = item.batches.find(
         b => b.batchNumber === i.batchNumber &&
              new Date(b.expiryDate).toDateString() === parsedExpiryDate.toDateString()
@@ -91,6 +93,9 @@ const createTransaction = async (req, res) => {
 
     const newTransaction = await Transaction.create(transactionData);
 
+    // ✅ Step 4: Update invoice daily log
+    await updateInvoiceLog(newTransaction);
+
     if (mode === 'b2b') {
       await Customer.findByIdAndUpdate(b2bCustomer, {
         $push: { transactions: newTransaction._id },
@@ -110,7 +115,6 @@ const createTransaction = async (req, res) => {
     res.status(400).json({ success: false, message: err.message });
   }
 };
-
 
 // 2. Get Transaction History for B2B Customer
 const getTransactionHistory = async (req, res) => {

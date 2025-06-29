@@ -9,6 +9,8 @@ const connectDB = require("./src/config/db");
 const transactionRoutes = require('./src/routes/transactionRoutes');
 const cors = require("cors");
 const totalSalesRoutes = require('./routes/totalSalesRoutes');
+const invoiceLogRoutes = require('./routes/invoiceLogRoutes');
+
 
 dotenv.config();
 connectDB();
@@ -29,6 +31,8 @@ app.use('/api/item',itemRoutes);
 app.use("/api/b2bCustomer",b2bCustomer);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api', totalSalesRoutes);
+app.use('/api', invoiceLogRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
