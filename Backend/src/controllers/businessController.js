@@ -11,13 +11,25 @@ exports.createBusinessProfile = async (req, res) => {
     if (user.role !== "owner") {
       return res.status(403).json({ success: false, error: "Only owner can create business profiles" });
     }
-    if(user.businessId){
-      return res.status(403).json({success: false, error: "Business Profile already existed"})
-    }
-    //const { businessName, gstNumber, address, contactNumber, logoUrl } = req.body;
-    const { businessName, gstNumber, address, contactNumber, logoUrl } = parsed.data;
 
-    
+    // Check if user already has a business profile
+    if (user.businessId) {
+      return res.status(403).json({ success: false, error: "Business profile already exists" });
+    }
+
+    const {
+      businessName,
+      gstNumber,
+      establishYear,
+      websiteUrl,
+      description,
+      businessEmail,
+      address,
+      contactNumber,
+      logoUrl
+    } = req.body;
+
+    // Check if a business with the same GST number already exists
     const gstExists = await BusinessProfile.findOne({ gstNumber });
     if (gstExists) {
       return res.status(400).json({ success: false, error: "A business with this GST number already exists" });
@@ -27,13 +39,17 @@ exports.createBusinessProfile = async (req, res) => {
     const profile = await BusinessProfile.create({
       businessName,
       gstNumber,
+      establishYear,
+      description,
+      businessEmail,
+      websiteUrl,
       address,
       contactNumber,
       logoUrl,
       createdBy: user._id,
     });
 
-    // Update the admin user’s businessId in userschema so that it can be known which business admin belong
+    // Update the user's businessId
     user.businessId = profile._id;
     await user.save();
 
@@ -48,6 +64,7 @@ exports.createBusinessProfile = async (req, res) => {
     res.status(500).json({ success: false, error: "Server error" });
   }
 };
+
 
 //  Geting business profile for the logged-in user
 exports.getBusinessProfile = async (req, res) => {

@@ -7,31 +7,39 @@ exports.createItem = async (req, res) => {
   try {
     const parsed = createItemSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ success: false, errors: parsed.error.flatten().fieldErrors });
+      return res.status(400).json({
+        success: false,
+        errors: parsed.error.flatten().fieldErrors,
+      });
     }
 
     const businessId = req.user.businessId;
     const { name, manufacturer, gstRate, hsnCode, unit, description, batches } = parsed.data;
-    const batch = batches[0];
-    const item = await Item.findOne({ name, manufacturer, businessId });
+
+    let item = await Item.findOne({ name, manufacturer, businessId });
 
     if (item) {
-      const existingBatch = item.batches.find(b => 
-        b.batchNumber === batch.batchNumber &&
-        dayjs(b.expiryDate).isSame(dayjs(batch.expiryDate), 'day')
-      );
+      batches.forEach((newBatch) => {
+        const existingBatch = item.batches.find(
+          (b) =>
+            b.batchNumber === newBatch.batchNumber &&
+            dayjs(b.expiryDate).isSame(dayjs(newBatch.expiryDate), "day")
+        );
 
-      if (existingBatch) {
-        existingBatch.stockQuantity += batch.stockQuantity;
-      } else {
-        item.batches.push(batch);
-      }
+        if (existingBatch) {
+          existingBatch.stockQuantity += newBatch.stockQuantity;
+        } else {
+          item.batches.push(newBatch);
+        }
+      });
 
       await item.save();
-      return res.status(200).json({ success: true, message: "Item batch added/updated", item });
+      return res
+        .status(200)
+        .json({ success: true, message: "Item batches added/updated", item });
     }
 
-    // Create new item
+    // If item doesn't exist, create it with all batches
     const newItem = await Item.create({
       name,
       manufacturer,
@@ -40,11 +48,12 @@ exports.createItem = async (req, res) => {
       unit,
       description,
       businessId,
-      batches: [batch]
+      batches,
     });
 
-    res.status(201).json({ success: true, message: "Item created successfully", item: newItem });
-
+    res
+      .status(201)
+      .json({ success: true, message: "Item created successfully", item: newItem });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

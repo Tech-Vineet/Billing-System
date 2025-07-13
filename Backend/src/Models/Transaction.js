@@ -1,36 +1,45 @@
-
 const mongoose = require('mongoose');
 
-
-const transactionItemSchema = new mongoose.Schema({
+const invoiceItemSchema = new mongoose.Schema({
   itemId: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true },
-  itemName: String,
-  batchNumber: String,
-  expiryDate: Date,
-  quantity: Number,
-  price: Number,
-  gst: Number,
-  discount: Number,
-});
+  itemName: { type: String, required: true },
+  batchNumber: { type: String, required: true },
+  expiryDate: { type: Date, required: true },
 
-const transactionSchema = new mongoose.Schema({
-  billNo: { type: Number, unique: true },
-  transactionType: { type: String, enum: ['buy', 'sell'], required: true },
+  quantity: { type: Number, required: true },
+  quantityType: { type: String, enum: ['unit', 'pack', 'box'], required: true },
+
+  price: { type: Number, required: true },       // Price per unit
+  gst: { type: Number, default: 0 },             // % GST
+  discount: { type: Number, default: 0 },        // per unit discount
+}, { _id: false });
+
+const invoiceSchema = new mongoose.Schema({
+  billNo: { type: Number, unique: true, required: true },
+  transactionType: { type: String, enum: ['sell'], default: 'sell' },
   mode: { type: String, enum: ['b2b', 'b2c'], required: true },
+  
 
-  b2bCustomer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: function() { return this.mode === 'b2b'; } },
+  // B2B: send only customer ID
+b2bCustomer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
+
+
+  // B2C: fill manually
   b2cCustomer: {
-    name: String,
-    contact: String,
+    name: { type: String },
+    contact: { type: String },
+    doctor: { type: String },
+    age: { type: Number }
   },
 
-  items: [transactionItemSchema],
+  items: [invoiceItemSchema],
 
-  totalAmount: Number,
-  gstAmount: Number,
-  finalAmount: Number,
+  totalAmount: { type: Number, required: true },   // subtotal before gst/discount
+  gstAmount: { type: Number, required: true },
+  finalAmount: { type: Number, required: true },   // total + gst - discount
 
   date: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model('Transaction', transactionSchema);
+module.exports = mongoose.model('Transaction', invoiceSchema);
+

@@ -20,13 +20,8 @@ exports.register = async (req, res) => {
         error: parsed.error.flatten().fieldErrors,
       });
     }
-    //const { name, email, password, role } = req.body;
 
     const { name, email, password, role } = parsed.data;
-
-    // if (!name || !email || !password || !role) {
-    //   return res.status(400).json({ success: false, error: "All fields are required" });
-    // }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -64,7 +59,6 @@ exports.login = async (req, res) => {
 
     const token = user.generateToken();
 
-    // Send token in response body instead of cookie
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -95,7 +89,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-//  Add staff user (Admin only)
 exports.addUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -114,7 +107,7 @@ exports.addUser = async (req, res) => {
       email,
       password,
       role,
-      businessId: req.user.businessId, // set same businessId as logged-in admin
+      businessId: req.user.businessId,
     });
 
     await newUser.save();
@@ -132,6 +125,7 @@ exports.addUser = async (req, res) => {
 //  Get all users under the same business
 exports.getAllUsers = async (req, res) => {
   try {
+    console.log("get")
     const users = await User.find({ businessId: req.user.businessId }).select("-password");
     res.json({ success: true, users });
   } catch (error) {
@@ -139,44 +133,43 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-//  Update user (Admin only)
 exports.updateUser = async (req, res) => {
   try {
-    //const user=await User.findById(req.user._id)
+    console.log("under")
     const { id } = req.params;
-    const { name, email, role } = req.body;
 
-    user = await User.findByIdAndUpdate(
-      id,
-      { name, email, role },
-      { new: true }
-    ).select("-password");
+    console.log(id)
 
-    if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
-    }
-    const parsed=updateUserSchema.safeParse(req.body);
-    if(!parsed.success){
+    // ✅ Step 1: Validate input
+    const parsed = updateUserSchema.safeParse(req.body);
+    if (!parsed.success) {
       return res.status(400).json({
-        success:false,
+        success: false,
         error: parsed.error.flatten().fieldErrors,
       });
     }
-    //const { name, email, password, role } = req.body;
 
-  //  const { name, email, password, role } = parsed.data;
+    const { name, email, role } = parsed.data;
 
-    // Update only the fields that are provided in the request
+    // ✅ Step 2: Find the user
+    const existingUser = await User.findById(id);
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    // ✅ Step 3: Update fields
     if (name) existingUser.name = name;
     if (email) existingUser.email = email;
     if (role) existingUser.role = role;
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      existingUser.password = await bcrypt.hash(password, salt);
-    }
 
+
+    // ✅ Step 4: Save updated user
     const updatedUser = await existingUser.save();
 
+    // ✅ Step 5: Respond
     res.status(200).json({
       success: true,
       message: "User updated successfully",
@@ -191,8 +184,6 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
-
-// @desc Delete user (Admin only)
 exports.deleteUser = async (req, res) => {
   try {
 

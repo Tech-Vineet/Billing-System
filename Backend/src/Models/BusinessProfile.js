@@ -5,10 +5,17 @@ const BusinessProfileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  establishYear : {
+    type : Number,
+
+  },
   gstNumber: {
     type: String,
     required: true,
     unique: true,
+  },
+  businessEmail :{
+    type : String
   },
   address: {
     type: String,
@@ -17,6 +24,12 @@ const BusinessProfileSchema = new mongoose.Schema({
   contactNumber: {
     type: String,
     required: true,
+  },
+  websiteUrl : {
+    type : String,
+  },
+  description : {
+    type : String
   },
   logoUrl: {
     type: String,

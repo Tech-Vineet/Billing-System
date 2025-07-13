@@ -1,4 +1,4 @@
-const B2BCustomer = require("../Models/Customer");
+const Customer = require("../Models/Customer");
 const { createB2BCustomerSchema, updateB2BCustomerSchema } = require("../validators/customerValidators");
 
 // Create B2B Customer
@@ -11,12 +11,12 @@ exports.createB2BCustomer = async (req, res) => {
 
     const { gstNumber } = parsed.data;
 
-    const exists = await B2BCustomer.findOne({ gstNumber });
+    const exists = await Customer.findOne({ gstNumber });
     if (exists) {
       return res.status(400).json({ success: false, error: "Customer with this GST already exists" });
     }
 
-    const customer = await B2BCustomer.create({
+    const customer = await Customer.create({
       ...parsed.data,
       businessId: req.user.businessId,
     });
@@ -30,7 +30,7 @@ exports.createB2BCustomer = async (req, res) => {
 // Get All B2B Customers for Current Business
 exports.getAllB2BCustomers = async (req, res) => {
   try {
-    const customers = await B2BCustomer.find({ businessId: req.user.businessId });
+    const customers = await Customer.find({ businessId: req.user.businessId });
     res.json({ success: true, data: customers });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

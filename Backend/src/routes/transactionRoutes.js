@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const {
-  createTransaction,
-  getTransactionHistory,
+  createInvoice,
+  getAllInvoices,
   searchTransactions
 } = require('../controllers/transactionControlller')
 
-router.post('/', createTransaction);
-router.get('/history/:customerId', getTransactionHistory);
+router.post('/create', createInvoice);
+router.get('/getall', getAllInvoices);
 router.get('/search', searchTransactions);
 
 module.exports = router;

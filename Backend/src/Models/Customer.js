@@ -35,37 +35,37 @@ const b2bCustomerSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    transactions: [
-      {
-        type: {
-          type: String,
-          enum: ["buy", "sell"],
-          required: true,
-        },
-        date: {
-          type: Date,
-          default: Date.now,
-        },
-        items: [
-          {
-            item: {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: "Item",
-              required: true,
-            },
-            quantity: {
-              type: Number,
-              required: true,
-            },
-          },
-        ],
-      },
-    ],
+    // transactions: [
+    //   {
+    //     type: {
+    //       type: String,
+    //       enum: ["buy", "sell"],
+    //       required: true,
+    //     },
+    //     date: {
+    //       type: Date,
+    //       default: Date.now,
+    //     },
+    //     items: [
+    //       {
+    //         item: {
+    //           type: mongoose.Schema.Types.ObjectId,
+    //           ref: "Item",
+    //           required: true,
+    //         },
+    //         quantity: {
+    //           type: Number,
+    //           required: true,
+    //         },
+    //       },
+    //     ],
+    //   },
+    // ],
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("B2BCustomer", b2bCustomerSchema);
+module.exports = mongoose.model("Customer", b2bCustomerSchema);
 
 
 

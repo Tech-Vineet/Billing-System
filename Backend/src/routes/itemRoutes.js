@@ -13,7 +13,6 @@ const {
 
 const {auth,adminOnly}= require("../middlewares/authMiddleware");
 
-
 router.get("/getallItems", auth, getAllItems);
 router.get("/getItemById/:id", auth, getItemById);
 router.get("/search",auth, searchItemsByName);

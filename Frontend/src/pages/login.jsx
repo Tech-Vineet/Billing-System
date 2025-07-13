@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 
-export default function Signin() {
+export default function Login() {
     useRedirectIfAuthenticated()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

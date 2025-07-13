@@ -46,7 +46,7 @@ const itemSchema = new mongoose.Schema({
   },
   unit: {
     type: String,
-    enum: ['tablet', 'bottle', 'strip', 'tube', 'injection','capsule'],
+    enum: ['tablet', 'bottle', 'unit', 'strip', 'tube', 'injection','capsule'],
     required: true,
   },
   description: {
